@@ -29,6 +29,7 @@ umask 0066
 
 if [ -f "$CONFIG_PATH" ]; then
     wg-quick down ${INTERFACE_NAME}
+    rm $CONFIG_PATH
 fi
 
 if [ ! -f "$SERVER_PRIV_KEY_PATH" ]; then
