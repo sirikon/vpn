@@ -27,7 +27,9 @@ CLIENT_PUB_KEY_PATH="${CONFIG_FOLDER}/${CLIENT_PUB_KEY_FILE_NAME}"
 
 umask 0066
 
-wg-quick down ${INTERFACE_NAME}
+if [ -f "$CONFIG_PATH" ]; then
+    wg-quick down ${INTERFACE_NAME}
+fi
 
 if [ ! -f "$SERVER_PRIV_KEY_PATH" ]; then
     echo "Generating server key pair"
