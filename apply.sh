@@ -27,6 +27,8 @@ CLIENT_PUB_KEY_PATH="${CONFIG_FOLDER}/${CLIENT_PUB_KEY_FILE_NAME}"
 
 umask 0066
 
+wg-quick down ${INTERFACE_NAME}
+
 if [ ! -f "$SERVER_PRIV_KEY_PATH" ]; then
     echo "Generating server key pair"
     wg genkey > "$SERVER_PRIV_KEY_PATH"
@@ -64,5 +66,7 @@ fi
     export PEER_PUBLIC_KEY=$(cat "$SERVER_PUB_KEY_PATH")
     envsubst < ./assets/client.template.conf > $CLIENT_CONFIG_PATH
 )
+
+wg-quick up ${INTERFACE_NAME}
 
 qrencode -t ansiutf8 < $CLIENT_CONFIG_PATH
