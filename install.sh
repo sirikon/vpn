@@ -2,7 +2,7 @@
 
 set -e
 
-add-apt-repository ppa:wireguard/wireguard
+add-apt-repository -y ppa:wireguard/wireguard
 apt update
 apt upgrade -y
-apt install wireguard -y
+apt install -y wireguard
