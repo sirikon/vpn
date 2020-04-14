@@ -4,6 +4,13 @@ set -e
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 INTERFACE_NAME="wg0"
+PORT="51820"
+
+SERVER_PUBLIC_IP="$(curl -s checkip.amazonaws.com)"
+BASE_IP="10.0.0.0"
+SERVER_IP="10.0.0.1"
+CLIENT_IP="10.0.1.1"
+
 CONFIG_FOLDER="/etc/wireguard"
 CONFIG_PATH="${CONFIG_FOLDER}/${INTERFACE_NAME}.conf"
 CLIENT_CONFIG_PATH="${CONFIG_FOLDER}/${INTERFACE_NAME}-client.conf"
@@ -33,22 +40,27 @@ if [ ! -f "$CLIENT_PRIV_KEY_PATH" ]; then
 fi
 
 (
+    # Server config
+    export ADDRESS="${SERVER_IP}/16"
+    export LISTEN_PORT="${PORT}"
     export PRIVATE_KEY=$(cat "$SERVER_PRIV_KEY_PATH")
     export INTERFACE_NAME=$INTERFACE_NAME
     envsubst < ./assets/server.template.conf > $CONFIG_PATH
 )
 
 (
+    # Server peer config
     export PUBLIC_KEY=$(cat "$CLIENT_PUB_KEY_PATH")
-    export ALLOWED_IPS="10.0.1.1/32"
+    export ALLOWED_IPS="${CLIENT_IP}/32"
     envsubst < ./assets/server.peer.template.conf >> $CONFIG_PATH
 )
 
 (
-    export ADDRESS="10.0.1.1/16"
+    # Client config
+    export ADDRESS="${CLIENT_IP}/16"
     export PRIVATE_KEY=$(cat "$CLIENT_PRIV_KEY_PATH")
-    export PEER_ALLOWED_IPS="10.0.0.0/16"
-    export PEER_ENDPOINT="$(curl -s checkip.amazonaws.com):51820"
+    export PEER_ALLOWED_IPS="${BASE_IP}/16"
+    export PEER_ENDPOINT="${SERVER_PUBLIC_IP}:${PORT}"
     export PEER_PUBLIC_KEY=$(cat "$SERVER_PUB_KEY_PATH")
     envsubst < ./assets/client.template.conf > $CLIENT_CONFIG_PATH
 )
